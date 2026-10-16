@@ -28,44 +28,6 @@ width_(w), height_(h), mines_count_(mines_count)
     }
 }
 
-Board::Board(std::string filename) 
-{
-    
-    std::ifstream file(filename);
-    if (!file)
-    {
-        std::cerr << "Failed to open file!\n";
-        return ;
-    }
-
-    file >> height_ >> width_;
-    data = new Card*[height_];
-    for (int i = 0; i < height_; ++i)
-    {
-        data[i] = new Card[width_];
-    }
-
-
-    int x;
-    int y;
-    while(file >> y >> x)
-    {
-        if (is_coords_valid(y, x))
-        {
-            data[y][x].is_mine = true;
-        }
-    }
-    // print_all_revealed();
-
-    for (int i = 0; i < height_; ++i)
-    {
-        for (int j = 0; j < width_; ++j)
-        {
-            write_neighbours(i, j);
-        }
-    }
-
-}
 
 Board::~Board()
 {

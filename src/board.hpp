@@ -34,6 +34,5 @@ public:
     bool is_win();
     
     Board(int w, int h, int mines_count);
-    Board(std::string filename);
     ~Board();
 };
