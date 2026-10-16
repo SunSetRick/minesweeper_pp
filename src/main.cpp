@@ -1,6 +1,72 @@
 #include <iostream>
 #include "board.hpp"
 
+void print_xo_view(Board& board)
+{
+    for (int i = 0; i < board.height(); ++i)
+    {
+        for (int j = 0; j < board.width(); ++j)
+        {
+            if (board.at(i, j).is_mine)
+            {
+                std::cout << "X ";
+            }
+            else
+            {
+                std::cout << "O ";
+            }
+        }
+        std::cout << "\n";
+    }
+}
+
+void print_all_revealed(Board& board)
+{
+    for (int i = 0; i < board.height(); ++i)
+    {
+        for (int j = 0; j < board.width(); ++j)
+        {
+            if (board.at(i, j).is_mine)
+            {
+                std::cout << "X ";
+            }
+            else
+            {
+                std::cout << board.at(i, j).neighbours << " ";
+            }
+            // std::cout << board.at(i, j).neighbours;
+        }
+        std::cout << "\n";
+    }
+}
+
+void print_current(Board& board)
+{
+    for (int i = 0; i < board.height(); ++i)
+    {
+        for (int j = 0; j < board.width(); ++j)
+        {
+            if (board.at(i, j).is_revealed)
+            {
+                std::cout << board.at(i, j).neighbours << " ";
+            }
+            else
+            {
+                if (board.at(i, j).is_flagged)
+                {
+                    std::cout << "f ";
+                }
+                else
+                {
+                    std::cout << ". ";
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+}
+
+
 int main()
 {
     bool done = false;
@@ -13,49 +79,44 @@ int main()
     Board board(y, x, count);
     // board.print_all_revealed();
 
-    while (!done && !(std::cin >> x >> y >> type))
+    while (!done)
     {
-        board.print_current();
+        print_current(board);
+        // print_all_revealed(board);
         std::cout << "Enter coords and action (t - touch, f - flag) (x y t/f): ";
-        
-        --x;
-        --y;
-        if (board.is_coords_valid(y, x))
+    
+        if (std::cin >> x >> y >> type)
         {
-            if (type == 't')
+            --x;
+            --y;
+            if (board.is_coords_valid(y, x))
             {
-                if (!board.at(y, x).is_flagged)
+                if (type == 't')
                 {
-                    if(board.at(y, x).is_mine)
-                    {
-                        std::cout << "BOOM!\n";
-                        board.print_all_revealed();
-                        done = true;
-                    }
-                    else
-                    {
-                        board.reveal_alg(y, x);
-                    }
+                    board.touch_card(y, x);
+                }
+                else if (type == 'f')
+                {
+                    board.flag_card(y, x);
+                }
+            }
+            else
+            {
+                std::cout << "Coords invalid!\n";
+            }
+            if (board.state() == "win")
+            {
+                print_all_revealed(board);
+                std::cout << "YOU WOOON\n";
+                done = true;
+            }
+            else if (board.state() == "lose")
+            {
+                print_all_revealed(board);
+                std::cout << "YOU LOSE\n";
+                done = true;
+            }
 
-                }
-            }
-            else if (type == 'f')
-            {
-                if(!board.at(y, x).is_revealed)
-                {
-                    board.at(y, x).is_flagged = !board.at(y, x).is_flagged;
-                }
-            }
-        }
-        else
-        {
-            std::cout << "Coords invalid!\n";
-        }
-        if (board.is_win())
-        {
-            board.print_all_revealed();
-            std::cout << "YOU WOOON\n";
-            done = true;
         }
         
     }

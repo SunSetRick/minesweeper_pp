@@ -5,6 +5,7 @@
 #include <string>
 #include <random>
 #include <queue>
+#include <utility>
 
 Board::Board(int h, int w, int mines_count) : 
 width_(w), height_(h), mines_count_(mines_count)
@@ -29,6 +30,8 @@ width_(w), height_(h), mines_count_(mines_count)
             write_neighbours(i, j);
         }
     }
+
+    state_ = "in_game";
 }
 
 
@@ -44,70 +47,6 @@ Board::~Board()
     }
 }
 
-void Board::print_xo_view()
-{
-    for (int i = 0; i < height_; ++i)
-    {
-        for (int j = 0; j < width_; ++j)
-        {
-            if (data[i][j].is_mine)
-            {
-                std::cout << "X ";
-            }
-            else
-            {
-                std::cout << "O ";
-            }
-        }
-        std::cout << "\n";
-    }
-}
-
-void Board::print_all_revealed()
-{
-    for (int i = 0; i < height_; ++i)
-    {
-        for (int j = 0; j < width_; ++j)
-        {
-            if (data[i][j].is_mine)
-            {
-                std::cout << "X ";
-            }
-            else
-            {
-                std::cout << data[i][j].neighbours << " ";
-            }
-            // std::cout << data[i][j].neighbours;
-        }
-        std::cout << "\n";
-    }
-}
-
-void Board::print_current()
-{
-    for (int i = 0; i < height_; ++i)
-    {
-        for (int j = 0; j < width_; ++j)
-        {
-            if (data[i][j].is_revealed)
-            {
-                std::cout << data[i][j].neighbours << " ";
-            }
-            else
-            {
-                if (data[i][j].is_flagged)
-                {
-                    std::cout << "f ";
-                }
-                else
-                {
-                    std::cout << ". ";
-                }
-            }
-        }
-        std::cout << "\n";
-    }
-}
 
 bool Board::is_coords_valid(int y, int x)
 {
@@ -123,17 +62,40 @@ Card& Board::at(int y, int x)
     return data[y][x];
 }
 
+const std::string& Board::state()
+{
+    return state_;
+}
+
+const int& Board::height()
+{
+    return height_;
+}
+
+const int& Board::width()
+{
+    return width_;
+}
+
 void Board::write_neighbours(int card_y, int card_x)
 {
     int count = 0;
+    int new_y = 0;
+    int new_x = 0;
 
     for (int dy = -1; dy <= 1; ++dy)
     {
         for (int dx = -1; dx <= 1; ++dx)
         {
-            if (at(card_y + dy, card_x + dx).is_mine)
+            new_y = card_y + dy;
+            new_x = card_x + dx;
+            
+            if (is_coords_valid(new_y, new_x))
             {
-                ++count;
+                if (at(card_y + dy, card_x + dx).is_mine)
+                {
+                    ++count;
+                }
             }
         }
     }
@@ -156,30 +118,55 @@ void Board::reveal_alg(int y, int x)
         std::pair<int, int> coords = q.front();
         Card& current_card = at(coords.first, coords.second);
 
-        if (current_card.is_flagged || current_card.is_mine || current_card.is_revealed)
-        {
-            q.pop();
-        }
-        else
+        if (!current_card.is_revealed)
         {
             current_card.is_revealed = true;
-            q.pop();
-            if (current_card.neighbours == 0)
+            revealed_count_++;
+        }
+        q.pop();
+        if (current_card.neighbours == 0)
+        {
+            for (int dy = -1; dy <= 1; ++dy)
             {
-                for (int dy = -1; dy <= 1; ++dy)
+                for (int dx = -1; dx <= 1; ++dx)
                 {
-                    for (int dx = -1; dx <= 1; ++dx)
+                    int new_y = coords.first + dy;
+                    int new_x = coords.second + dx;
+                    if (is_coords_valid(new_y, new_x) && !(at(new_y, new_x).is_flagged || at(new_y, new_x).is_mine || at(new_y, new_x).is_revealed))
                     {
-                        if (is_coords_valid(coords.first + dy, coords.second + dx))
-                        {
-                            q.push({coords.first + dy, coords.second + dx});
-                        }
+                        q.push({new_y, new_x});
                     }
                 }
             }
-            
         }
-        
+    }
+}
+
+void Board::touch_card(int y, int x)
+{
+    if (!at(y, x).is_flagged)
+    {
+        if(at(y, x).is_mine)
+        {
+            state_ = "lose";
+        }
+        else
+        {
+            reveal_alg(y, x);
+            if (revealed_count_ == height_ * width_ - mines_count_)
+            {
+                state_ = "win";
+            }
+        }
+
+    }
+}
+
+void Board::flag_card(int y, int x)
+{
+    if(!at(y, x).is_revealed)
+    {
+        at(y, x).is_flagged = !at(y, x).is_flagged;
     }
 }
 
@@ -203,23 +190,3 @@ void Board::board_random_fill(int mines_count)
     }
 }
 
-bool Board::is_win()
-{
-    int revealed_count = 0;
-    for (int i = 0; i < height_; ++i)
-    {
-        for (int j = 0; j < width_; ++j)
-        {
-            if (data[i][j].is_revealed)
-            {
-                revealed_count++;
-            }
-        }
-    }
-
-    if (height_ * width_ - mines_count_ == revealed_count)
-    {
-        return true;
-    }
-    return false;
-}
