@@ -4,9 +4,10 @@
 #include <fstream>
 #include <string>
 #include <random>
+#include <queue>
 
 Board::Board(int w, int h, int mines_count) : 
-width_(w), height_(h) 
+width_(w), height_(h), mines_count_(mines_count)
 {
     data = new Card*[height_];
     for (int i = 0; i < height_; ++i)
@@ -129,7 +130,14 @@ void Board::print_current()
             }
             else
             {
-                std::cout << ". ";
+                if (data[i][j].is_flagged)
+                {
+                    std::cout << "f ";
+                }
+                else
+                {
+                    std::cout << ". ";
+                }
             }
         }
         std::cout << "\n";
@@ -168,6 +176,48 @@ void Board::write_neighbours(int card_y, int card_x)
     data[card_y][card_x].neighbours = count;
 }
 
+void Board::reveal_alg(int y, int x)
+{
+    std::queue<std::pair<int, int>> q{};
+
+    if (at(y, x).is_revealed)
+    {
+        return;
+    }
+
+    q.push({y, x});
+    while (!q.empty())
+    {
+        std::pair<int, int> coords = q.front();
+        Card& current_card = at(coords.first, coords.second);
+
+        if (current_card.is_flagged || current_card.is_mine || current_card.is_revealed)
+        {
+            q.pop();
+        }
+        else
+        {
+            current_card.is_revealed = true;
+            q.pop();
+            if (current_card.neighbours == 0)
+            {
+                for (int dy = -1; dy <= 1; ++dy)
+                {
+                    for (int dx = -1; dx <= 1; ++dx)
+                    {
+                        if (is_coords_valid(coords.first + dy, coords.second + dx))
+                        {
+                            q.push({coords.first + dy, coords.second + dx});
+                        }
+                    }
+                }
+            }
+            
+        }
+        
+    }
+}
+
 void Board::board_random_fill(int mines_count)
 {
     std::random_device rd;
@@ -186,4 +236,25 @@ void Board::board_random_fill(int mines_count)
             mines_count--;
         }
     }
+}
+
+bool Board::is_win()
+{
+    int revealed_count = 0;
+    for (int i = 0; i < height_; ++i)
+    {
+        for (int j = 0; j < width_; ++j)
+        {
+            if (data[i][j].is_revealed)
+            {
+                revealed_count++;
+            }
+        }
+    }
+
+    if (height_ * width_ - mines_count_ == revealed_count)
+    {
+        return true;
+    }
+    return false;
 }

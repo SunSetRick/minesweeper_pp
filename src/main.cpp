@@ -15,26 +15,44 @@ int main()
     while (!done)
     {
         board.print_current();
-        std::cout << "Enter coords to touch (x y): ";
-        std::cin >> x >> y;
+        std::cout << "Enter coords and action (t - touch, f - flag) (x y t/f): ";
+        char type;
+        std::cin >> x >> y >> type;
         --x;
         --y;
         if (board.is_coords_valid(y, x))
         {
-            if(board.at(y, x).is_mine)
+            if (type == 't')
             {
-                std::cout << "BOOM!\n";
-                board.print_all_revealed();
-                return 0;
+                if(board.at(y, x).is_mine)
+                {
+                    std::cout << "BOOM!\n";
+                    board.print_all_revealed();
+                    return 0;
+                }
+                else
+                {
+                    board.reveal_alg(y, x);
+                }
             }
-            else
+            else if (type == 'f')
             {
-                board.at(y, x).is_revealed = true;
+                if(!board.at(y, x).is_revealed)
+                {
+                    board.at(y, x).is_flagged = !board.at(y, x).is_flagged;
+                }
             }
         }
         else
         {
             std::cout << "Coords invalid!\n";
         }
+        if (board.is_win())
+        {
+            board.print_all_revealed();
+            std::cout << "YOU WOOON\n";
+            return 0;
+        }
+        
     }
 }

@@ -15,6 +15,7 @@ class Board
 private:
     int width_ = 0;
     int height_ = 0;
+    int mines_count_ = 0;
     Card** data = nullptr;
 
     Card trash_object;
@@ -28,6 +29,9 @@ public:
 
     bool is_coords_valid(int y, int x);
     Card& at(int y, int x);
+
+    void reveal_alg(int y, int x);
+    bool is_win();
     
     Board(int w, int h, int mines_count);
     Board(std::string filename);
