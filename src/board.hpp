@@ -17,8 +17,6 @@ private:
     int height_ = 0;
     int mines_count_ = 0;
     Card** data = nullptr;
-
-    Card trash_object;
     
     void write_neighbours(int cardY, int cardX);
     void board_random_fill(int mines_count);

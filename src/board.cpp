@@ -116,11 +116,11 @@ bool Board::is_coords_valid(int y, int x)
 
 Card& Board::at(int y, int x)
 {
-    if (is_coords_valid(y, x))
+    if (!is_coords_valid(y, x))
     {
-        return data[y][x];
+        throw std::out_of_range("Board at tryes to take something out of data");
     }
-    return trash_object;
+    return data[y][x];
 }
 
 void Board::write_neighbours(int card_y, int card_x)
