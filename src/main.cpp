@@ -24,15 +24,19 @@ int main()
         {
             if (type == 't')
             {
-                if(board.at(y, x).is_mine)
+                if (!board.at(y, x).is_flagged)
                 {
-                    std::cout << "BOOM!\n";
-                    board.print_all_revealed();
-                    return 0;
-                }
-                else
-                {
-                    board.reveal_alg(y, x);
+                    if(board.at(y, x).is_mine)
+                    {
+                        std::cout << "BOOM!\n";
+                        board.print_all_revealed();
+                        return 0;
+                    }
+                    else
+                    {
+                        board.reveal_alg(y, x);
+                    }
+
                 }
             }
             else if (type == 'f')
