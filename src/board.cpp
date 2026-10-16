@@ -6,17 +6,20 @@
 #include <random>
 #include <queue>
 
-Board::Board(int w, int h, int mines_count) : 
+Board::Board(int h, int w, int mines_count) : 
 width_(w), height_(h), mines_count_(mines_count)
 {
+    if (!(width_ > 0 && height_ > 0 && width_ * height_ > mines_count_))
+    {
+        throw std::invalid_argument("Board constraction invalid args");
+    }
+    
     data = new Card*[height_];
     for (int i = 0; i < height_; ++i)
     {
         data[i] = new Card[width_];
     }
 
-
-    // print_xo_view();
     board_random_fill(mines_count);
 
     for (int i = 0; i < height_; ++i)

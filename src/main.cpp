@@ -5,19 +5,19 @@ int main()
 {
     bool done = false;
     std::cout << "Welcome to minesweeper v.0.0.2, remind that coords indexing starts from 1\n";
-    std::cout << "Please enter field scales and mines count (Y X Count): ";
+    std::cout << "Please enter field scales and mines count (X Y Count): ";
     
     int x, y, count;
+    char type;
     std::cin >> x >> y >> count;
-    Board board(x, y, count);
+    Board board(y, x, count);
     // board.print_all_revealed();
 
-    while (!done)
+    while (!done && !(std::cin >> x >> y >> type))
     {
         board.print_current();
         std::cout << "Enter coords and action (t - touch, f - flag) (x y t/f): ";
-        char type;
-        std::cin >> x >> y >> type;
+        
         --x;
         --y;
         if (board.is_coords_valid(y, x))

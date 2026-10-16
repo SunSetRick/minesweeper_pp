@@ -33,6 +33,8 @@ public:
     void reveal_alg(int y, int x);
     bool is_win();
     
-    Board(int w, int h, int mines_count);
+    Board(int h, int w, int mines_count);
+    Board(const Board&) = delete; 
+    Board& operator=(const Board&) = delete;
     ~Board();
 };
