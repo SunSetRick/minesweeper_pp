@@ -4,7 +4,7 @@
 int main()
 {
     bool done = false;
-    std::cout << "Welcome to minesweeper v.0.0.1, remind that coords indexing starts from 1\n";
+    std::cout << "Welcome to minesweeper v.0.0.2, remind that coords indexing starts from 1\n";
     std::cout << "Please enter field scales and mines count (Y X Count): ";
     
     int x, y, count;
@@ -30,7 +30,7 @@ int main()
                     {
                         std::cout << "BOOM!\n";
                         board.print_all_revealed();
-                        return 0;
+                        done = true;
                     }
                     else
                     {
@@ -55,7 +55,7 @@ int main()
         {
             board.print_all_revealed();
             std::cout << "YOU WOOON\n";
-            return 0;
+            done = true;
         }
         
     }
